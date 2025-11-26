@@ -68,7 +68,28 @@ bool compararFechas(const string& s1, const string& s2){
     if (m1!=m2) return m1>m2;
     return d1>=d2;
 }
-
+bool igualFecha(const string& s1, const string&s2){
+	int a1,a2,m1,m2,d1,d2;
+	stringstream ss1(s1);
+	stringstream ss2(s2);
+	char slash;
+	ss1>>a1>>slash>>m1>>slash>>d1;
+	ss2>>a2>>slash>>m2>>slash>>d2;
+	if (a1!=a2) return false;
+	if (m1!=m2) return false;
+	if (d1!=d2) return false;
+	return true;
+}
+void comentariosEnFecha(){
+	cout<<"Ingrese la fecha a buscar: ";
+	string fecha;
+	cin>>fecha;
+	int contador = 0;
+	for(const Comentario &c : comentarios){
+		if(igualFecha(fecha, c.fecha)) contador++;
+	}
+	cout<<"En esa fecha hay "<<contador<<" comentarios"<<endl;
+}
 void cargarComentarios(const string &date){
     cout<<"Cargando Comentarios..."<<endl;
     system("cls");
@@ -117,7 +138,18 @@ int productosBajoStock() {
     }
     return contador;
 }
-
+void productos5BajoStock() {
+	vector<Producto> ordenados;
+	ordenados.assign(Productos.begin(),Productos.end());
+    sort(ordenados.begin(), ordenados.end(), [](const Producto &p1, const Producto &p2){
+	return p1.stock<p2.stock;});
+    mostrarEncabezadoTabla("LOS 5 PRODUCTOS CON MENOR STOCK");
+    mostrarColumnas(false);
+	for (int i=0; i<5; i++){
+    	mostrarFilaProducto(ordenados[i], false);
+	}
+	mostrarLineaSeparadora();
+}
 void listarProductos() {
     mostrarEncabezadoTabla("LISTA DE PRODUCTOS");
     mostrarColumnas(false);
@@ -133,7 +165,22 @@ void bajoStock() {
     mostrarLineaSeparadora();
     cout << "Total de productos con bajo stock: " << total << endl << endl;
 }
-
+void precios(){
+	mostrarEncabezadoTabla("PRODUCTO CON MAYOR PRECIO");
+	mostrarColumnas(false);
+	Producto maximo = *(max_element(Productos.begin(), Productos.end(), [](const Producto &p1, const Producto &p2){
+		return p1.precio < p2.precio;
+	}));
+	Producto minimo = *(min_element(Productos.begin(), Productos.end(), [](const Producto &p1, const Producto &p2){
+		return p1.precio < p2.precio;
+	}));
+	mostrarFilaProducto(maximo, false);
+	mostrarLineaSeparadora();
+	mostrarEncabezadoTabla("PRODUCTO CON MENOR PRECIO");
+	mostrarColumnas(false);
+	mostrarFilaProducto(minimo, false);
+	mostrarLineaSeparadora();
+}
 void mostrarEncabezadoCarrito(const CarritoDeCompras &carrito) {
     mostrarEncabezadoTabla("CARRITO DE COMPRAS");
     cout << "Usuario: " << carrito.usuario.nombre << " (" << carrito.usuario.correoElectronico << ")" << endl;
@@ -300,8 +347,11 @@ int main(){
         cout << "2. Listar productos" << endl;
         cout << "3. Cargar comentarios despues de una fecha" << endl;
         cout << "4. Añadir producto al carrito de compras" << endl;
-        cout << "5. Salir" << endl;
-        entradaEnRango(opcion, 1, 5, "Seleccione una opcion (1-5): ", "Opcion invalida. Intente nuevamente.");
+        cout << "5. Mostrar los 5 productos con menor stock" << endl;
+        cout << "6. Mostrar la cantidad de comentarios en una fecha"<<endl;
+        cout << "7. Precio maximo y minimo de los productos"<<endl;
+        cout << "8. Salir" << endl;
+        entradaEnRango(opcion, 1, 8, "Seleccione una opcion (1-8): ", "Opcion invalida. Intente nuevamente.");
         system("cls");
         switch (opcion) {
             case 1: {
@@ -344,6 +394,18 @@ int main(){
                 break;
             }
             case 5: {
+            	productos5BajoStock();
+				break;
+			}
+			case 6: {
+				comentariosEnFecha();
+				break;
+			}
+			case 7:{
+				precios();
+				break;
+			}
+            case 8: {
                 guardarCarritosEnArchivo();
                 guardarCarritosPersistentes();
                 cout << "Gracias" << endl;
